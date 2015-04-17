@@ -200,3 +200,4 @@ stepsByDayType <- aggregate(steps ~ interval + dayofweek, data = data_weekdays, 
 xyplot(steps ~ interval | dayofweek, stepsByDayType, type = "l", layout = c(1, 2), 
        xlab = "Interval", ylab = "Number of steps")
 ```
+Weekdays show higher frequncies of steps taken as compared to on weekends.
