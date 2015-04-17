@@ -1,42 +1,31 @@
 ---
-title: "PA1_template.Rmd"
-output: PA1_template.html
+output:
+  html_document:
+    theme: spacelab
 ---
 # Reproducible Research: Peer assessment 1
 #### Ravi S Pandey
+_____
 
+## Introduction
+
+This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
 
 ## Loading and preprocessing the data
+We will first load any packages that might be required for the analysis.
 
 ### Load required libraries
 
 ```r
 library(knitr)
 library(ggplot2)
-```
-
-```
-## Warning: package 'ggplot2' was built under R version 3.1.3
-```
-
-```r
 library(lattice)
 ```
 
-### Set global options
-
-```r
-opts_chunk$set(echo = TRUE, results = 'hold')
-```
-
 ### Load the data
+Since the data is already in the working directory no need to download it. We can read  in the file through the read.csv() fucntion.
 
 ```r
-#Download the zip file
-fileurl <- "https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip"
-download.file(fileurl, "./data/activity.zip")
-#unzip the file
-unzip("./data/activity.zip")
 #read the file
 data <- read.csv("activity.csv")
 
@@ -46,6 +35,8 @@ data$interval <- as.factor(data$interval)
 ```
 
 ## What is mean total number of steps taken per day?
+
+We will have to aggregate the number of steps by date as there are multiple records for each date 
 
 ### Calculate the total number of steps taken per day
 
@@ -73,7 +64,7 @@ hist(STPD, main = "Histogram of number of steps per day",
 xlab = "Number of steps per day", ylab = "Frequency", col = "blue")
 ```
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png) 
 
 ### Calculate the mean and median of the number of steps taken per day.
 
@@ -82,9 +73,12 @@ STPD_mean   <- mean(STPD, na.rm=TRUE)
 STPD_median <- median(STPD, na.rm=TRUE)
 ```
 
+The mean is 10766.189
+The mdeian is 10765
+
 ## What is the average daily activity pattern?
 
-#### Calculate the aggregation of steps by intervals of 5-minutes and convert the intervals as integers and save them in a data frame called StepsPerInterval
+#### Aggregate the number of steps per 5-minute interval and convert the intervals as integers and save them in a data frame called StepsPerInterval
 
 ```r
 StepsPerInterval <- aggregate(data$steps, 
@@ -106,13 +100,16 @@ plot(StepsPerInterval,
      main = "Avg number of steps across 5-minute interval")
 ```
 
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7-1.png) 
+
 
 ### Find the 5-minute interval with the containing the maximum number of steps:
 
 ```r
 interval_maxsteps <- StepsPerInterval[which.max(StepsPerInterval$steps),]
 ```
+
+The 835th interval has maximum 206 steps.
 
 ## Imputing missing values
 
@@ -122,7 +119,14 @@ interval_maxsteps <- StepsPerInterval[which.max(StepsPerInterval$steps),]
 Totalmissingvals <- sum(is.na(data$steps))
 ```
 
+The total number of missing values are 2304.
+
 ### Strategy for filling in all of the missing values in the dataset
+
+To populate missing values, we choose to replace them with the mean value at the same interval across days. In most of the cases the median is a better centrality measure than mean, but in our case the total median is not much far away from total mean, and probably we can make the mean and median meets.
+
+We create a function missingfill(actdata, stprinterval) which the data arguement is the rdata data frame and pervalue arguement is the StepsPerInterval data frame.
+
 
 ```r
 missingfill <- function(actdata, stprinterval) {
@@ -160,6 +164,9 @@ sum(is.na(data_fill$steps))
 ## [1] 0
 ```
 
+There are no missing values.
+
+
 ### A histogram of the total number of steps taken each day
 
 ```r
@@ -169,7 +176,7 @@ hist(fill_StepsPerDay$steps, breaks = 6, main = "Total number of steps taken per
      xlab = "Number of steps per day", ylab = "Frequency", col = "red")
 ```
 
-![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png) 
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png) 
 
 ### Compute the new mean and median
 
@@ -178,7 +185,22 @@ fill_STPDmean   <- mean(fill_StepsPerDay$steps, na.rm=TRUE)
 fill_STPDmedian <- median(fill_StepsPerDay$steps, na.rm=TRUE)
 ```
 
-## What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+
+### What is the impact of imputing missing data on the estimates of the total daily number of steps?
+These values do differ slightly.
+
+.Before filling the data
+1.Mean : 10766.189
+2.Median: 10765
+
+
+.After filling the data
+1.Mean : 10766.189
+2.Median: 10766.189
+
+## Are there differences in activity patterns between weekdays and weekends?
+We do this comparison with the table with filled-in missing values. We will add a new colum that indicates the day of the week to the table.Subsequently, we will subset the table into two parts - weekends (Saturday and Sunday) and weekdays (Monday through Friday). Then calculate the average steps per interval for each data set. Plot the two data sets side by side for comparison
 
 ### Create a factor variable with two levels (weekday, weekend)
 
@@ -221,7 +243,7 @@ xyplot(steps ~ interval | dayofweek, stepsByDayType, type = "l", layout = c(1, 2
        xlab = "Interval", ylab = "Number of steps")
 ```
 
-![plot of chunk unnamed-chunk-16](figure/unnamed-chunk-16-1.png) 
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png) 
 
 
-Enter file contents here
+
